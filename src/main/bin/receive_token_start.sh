@@ -44,8 +44,8 @@ in
 	;;
 1 )	
 	var=$*
-	if [ -f $var ] ; then 
-		easy_conf=$var
+	if [ -f ${var} ] ; then
+		easy_conf=${var}
 	else
 		echo "THE PARAMETER IS NOT CORRECT.PLEASE CHECK AGAIN."
         exit
@@ -94,7 +94,7 @@ then
 	echo $! > $base/bin/receive_token.pid
 	
 	echo "cd to $current_path for continue"
-  	cd $current_path
+  	cd ${current_path}
 else 
 	echo "Easy conf("$easy_conf") OR log configration file($logback_configurationFile) is not exist,please create then first!"
 fi
