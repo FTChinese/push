@@ -2,6 +2,6 @@
 Push Notifications for iOS
 
 # Receive Token
-# Pull new blocked Token
+# Update Disable Token
 # Push System
 # Push Management
