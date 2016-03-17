@@ -11,9 +11,14 @@ import scala.xml.XML
  */
 class JobsConfig {
 
+    var kafka_consumer_consumeInterval: Int = 0
+
     var driverSettings = Map[String, Map[String, String]]()
 
     def parseConf(confProps: Properties): Unit = {
+
+        kafka_consumer_consumeInterval = confProps.getProperty("consumer.consume.interval", "0").toInt
+
         val dbConf = confProps.getProperty("database.conf", "database.xml")
 
         try {
