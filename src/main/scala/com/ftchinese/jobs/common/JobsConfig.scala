@@ -57,4 +57,8 @@ class JobsConfig {
             case e: Exception => // Ignore the file opening exceptions.
         }
     }
+
+    def fetchDriverConf(dbName: String = "", writable: String = "true"): Map[String, String] = {
+        driverSettings.map(_._2).filter(x => x.getOrElse("dbname", "") == dbName || x.getOrElse("writable", "true") == writable).last
+    }
 }
