@@ -63,7 +63,7 @@ class JobsConfig {
         }
     }
 
-    def fetchDriverConf(dbName: String = "", writable: String = "true"): Map[String, String] = {
-        driverSettings.map(_._2).filter(x => x.getOrElse("dbname", "") == dbName || x.getOrElse("writable", "true") == writable).last
+    def fetchDriverConf(dbName: String = "", dbType: String = "", writable: String = "true"): Map[String, String] = {
+        driverSettings.map(_._2).filter(x => x.getOrElse("dbname", "") == dbName && x.getOrElse("type", "") == dbType && x.getOrElse("writable", "true") == writable).last
     }
 }
