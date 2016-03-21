@@ -11,7 +11,7 @@ object ZookeeperManager extends Logging {
     private var _conf: JobsConfig = null
     private var _zk: ZookeeperClient = null
 
-    val app_root = "/ftc-push"
+    val app_root = "ftc-push"
     val topics_node = app_root + "/topics"
 
     def init(conf: JobsConfig): Unit ={
