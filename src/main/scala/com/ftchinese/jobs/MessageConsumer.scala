@@ -35,14 +35,14 @@ class MessageConsumer(kafkaConfig: Properties) {
         _consumer.subscribe(topics.toList.asJava, new SaveAndSeekOffsets(_consumer, defaultOffset) )
     }
 
-    def consume(f: (Long, String) => Unit): Unit ={
+    def consume(f: (Int, Long, String) => Unit): Unit ={
         val records: ConsumerRecords[String, String] = _consumer.poll(100)
 
         val recordsIterator = records.iterator()
 
         while (recordsIterator.hasNext) {
             val record = recordsIterator.next()
-            f(record.offset(), record.value())
+            f(record.partition(), record.offset(), record.value())
         }
     }
 

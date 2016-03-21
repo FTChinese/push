@@ -25,11 +25,11 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
         while (true) {
 
-            _consumer.consume((offset, message) => {
+            _consumer.consume((partition, offset, message) => {
 
                 try {
 
-                    log.info(offset + "###" + message)
+                    log.info(partition + "###" + offset + "###" + message)
 
                     val obj = JSON.parseObject(message)
 
@@ -94,7 +94,11 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
             if(_dbConf.size > 0) {
 
-                _consumer.subscribe(topics, 85792L)
+                // 85792L
+                if (conf.kafka_consumer_defaultOffset > 0)
+                    _consumer.subscribe(topics, conf.kafka_consumer_defaultOffset)
+                else
+                    _consumer.subscribe(topics)
 
                 consumeMessage()
             } else
