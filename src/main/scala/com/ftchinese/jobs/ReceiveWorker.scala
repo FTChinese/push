@@ -4,7 +4,7 @@ import java.util.Properties
 
 import akka.actor.Actor
 import com.alibaba.fastjson.JSON
-import com.ftchinese.jobs.common.{TokenMessage, Logging, JobsConfig}
+import com.ftchinese.jobs.common.{ZookeeperManager, TokenMessage, Logging, JobsConfig}
 import com.ftchinese.jobs.database.{BeanConfig, AnalyticDataSource, AnalyticDB}
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
@@ -89,6 +89,8 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
     override def receive: Receive = {
         case "Start" =>
+
+            ZookeeperManager.init(conf)
 
             _dbConf = conf.fetchDriverConf("analytic", "mysql")
 

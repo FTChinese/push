@@ -2,7 +2,7 @@ package com.ftchinese.jobs
 
 import java.util
 
-import com.ftchinese.jobs.common.Logging
+import com.ftchinese.jobs.common.{ZookeeperManager, ZookeeperClient, Logging}
 import org.apache.kafka.clients.consumer.{ConsumerRebalanceListener, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition
 
@@ -11,7 +11,6 @@ import org.apache.kafka.common.TopicPartition
  * Created by wanbo on 3/14/16.
  */
 class SaveAndSeekOffsets(consumer: KafkaConsumer[String, String], defaultOffset: Long = -1L) extends ConsumerRebalanceListener with Logging {
-
 
     /**
      * Read start offset before start to consume.
@@ -22,15 +21,21 @@ class SaveAndSeekOffsets(consumer: KafkaConsumer[String, String], defaultOffset:
 
         val topicPartition = collection.iterator()
 
-        if(defaultOffset > 0) {
+        while (topicPartition.hasNext) {
 
-            log.info("The consumer was assigned a new offset [%d] ...!".format(defaultOffset))
+            val tp = topicPartition.next()
 
-            while (topicPartition.hasNext) {
-                consumer.seek(topicPartition.next(), defaultOffset)
+            val storedOffset = ZookeeperManager.getTopicPartitionOffset(tp)
+
+            if(defaultOffset > 0 && storedOffset > 0) {
+                if(defaultOffset > storedOffset) {
+                    log.info("The consumer was assigned the default offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), defaultOffset))
+                    consumer.seek(tp, defaultOffset)
+                } else {
+                    log.info("The consumer was assigned the stored offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), defaultOffset))
+                    consumer.seek(tp, storedOffset)
+                }
             }
-        } else {
-            log.info("Read offset from zookeeper!")
         }
     }
 
@@ -46,6 +51,8 @@ class SaveAndSeekOffsets(consumer: KafkaConsumer[String, String], defaultOffset:
             val partition = topicPartition.next()
 
             val position = consumer.position(partition)
+
+            ZookeeperManager.setTopicPartitionOffset(partition, position)
 
             log.info("The consumer is shutting down, current offset is :" + partition.partition() + "#" + position)
             println(position)
