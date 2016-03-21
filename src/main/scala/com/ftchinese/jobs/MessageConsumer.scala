@@ -2,7 +2,9 @@ package com.ftchinese.jobs
 
 import java.util.Properties
 
-import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
+import com.ftchinese.jobs.common.Logging
+import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
+import org.slf4j.MDC
 
 import scala.collection.JavaConverters._
 
@@ -10,7 +12,9 @@ import scala.collection.JavaConverters._
  * Message consumer.
  * Created by wanbo on 3/14/16.
  */
-class MessageConsumer(kafkaConfig: Properties) {
+class MessageConsumer(kafkaConfig: Properties) extends Logging {
+
+    MDC.put("destination", "system")
 
     private var defaultConf = Map[String, String]()
     defaultConf = defaultConf.+("bootstrap.servers" -> "")
@@ -35,14 +39,13 @@ class MessageConsumer(kafkaConfig: Properties) {
         _consumer.subscribe(topics.toList.asJava, new SaveAndSeekOffsets(_consumer, defaultOffset) )
     }
 
-    def consume(f: (Int, Long, String) => Unit): Unit ={
-        val records: ConsumerRecords[String, String] = _consumer.poll(100)
+    def consume(f: (List[ConsumerRecord[String, String]]) => Unit): Unit ={
+        val records: ConsumerRecords[String, String] = _consumer.poll(10)
 
-        val recordsIterator = records.iterator()
+        val recordsList = records.iterator().asScala.toList
 
-        while (recordsIterator.hasNext) {
-            val record = recordsIterator.next()
-            f(record.partition(), record.offset(), record.value())
+        if(recordsList.size > 0){
+            f(recordsList)
         }
     }
 

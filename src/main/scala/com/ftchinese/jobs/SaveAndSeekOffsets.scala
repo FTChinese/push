@@ -2,7 +2,7 @@ package com.ftchinese.jobs
 
 import java.util
 
-import com.ftchinese.jobs.common.{ZookeeperManager, ZookeeperClient, Logging}
+import com.ftchinese.jobs.common.{Logging, ZookeeperManager}
 import org.apache.kafka.clients.consumer.{ConsumerRebalanceListener, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition
 
@@ -27,14 +27,17 @@ class SaveAndSeekOffsets(consumer: KafkaConsumer[String, String], defaultOffset:
 
             val storedOffset = ZookeeperManager.getTopicPartitionOffset(tp)
 
-            if(defaultOffset > 0 && storedOffset > 0) {
-                if(defaultOffset > storedOffset) {
-                    log.info("The consumer was assigned the default offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), defaultOffset))
-                    consumer.seek(tp, defaultOffset)
-                } else {
-                    log.info("The consumer was assigned the stored offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), defaultOffset))
-                    consumer.seek(tp, storedOffset)
-                }
+            log.info("Default offset:" + defaultOffset)
+            log.info("Stored offset:" + storedOffset)
+
+            if(defaultOffset > 0) {
+                log.info("The consumer was assigned the default offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), defaultOffset))
+                consumer.seek(tp, defaultOffset)
+            } else if (storedOffset > 0) {
+                log.info("The consumer was assigned the stored offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), storedOffset))
+                consumer.seek(tp, storedOffset)
+            } else {
+                log.info("There is no offset settings, so consume automatically.!")
             }
         }
     }
@@ -55,7 +58,7 @@ class SaveAndSeekOffsets(consumer: KafkaConsumer[String, String], defaultOffset:
             ZookeeperManager.setTopicPartitionOffset(partition, position)
 
             log.info("The consumer is shutting down, current offset is :" + partition.partition() + "#" + position)
-            println(position)
+            //println(position)
         }
     }
 }

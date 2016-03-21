@@ -4,8 +4,11 @@ import java.util.Properties
 
 import akka.actor.Actor
 import com.alibaba.fastjson.JSON
-import com.ftchinese.jobs.common.{ZookeeperManager, TokenMessage, Logging, JobsConfig}
-import com.ftchinese.jobs.database.{BeanConfig, AnalyticDataSource, AnalyticDB}
+import com.ftchinese.jobs.common.{JobsConfig, Logging, TokenMessage, ZookeeperManager}
+import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.TopicPartition
+import org.slf4j.MDC
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 
@@ -17,23 +20,35 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
     private val _consumer = new MessageConsumer(kafkaConf)
 
+    private var _latestConsume = Map[TopicPartition, Long]()
+
+    private var _status = "start"
+
     private var _dbConf = Map[String, String]()
 
     private var _bufferedDataList = List[TokenMessage]()
 
+    MDC.put("destination", "system")
+
     def consumeMessage(): Unit = {
 
-        while (true) {
 
-            _consumer.consume((partition, offset, message) => {
+        _consumer.consume((recordsList: List[ConsumerRecord[String, String]]) => {
 
-                try {
+            try {
 
-                    log.info(partition + "###" + offset + "###" + message)
+                recordsList.foreach(record => {
+
+                    val topic = record.topic()
+                    val partition = record.partition()
+                    val offset = record.offset()
+                    val message = record.value()
+
+                    log.info(topic + "###" + partition + "###" + offset + "###" + message)
+
+                    _latestConsume = _latestConsume.updated(new TopicPartition(topic, partition), offset)
 
                     val obj = JSON.parseObject(message)
-
-
 
                     var deviceToken = ""
                     var timeZone = ""
@@ -58,32 +73,36 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
                     if(obj.containsKey("timestamp"))
                         timestamp = obj.getString("timestamp").trim
 
-
                     _bufferedDataList = _bufferedDataList :+ TokenMessage(deviceToken, timeZone, status, preference, deviceType, appNumber, timestamp)
+                })
 
-                    if(_bufferedDataList.size > 0) {
-                        _bufferedDataList.synchronized {
-                            save(_bufferedDataList)
-                            _bufferedDataList = List[TokenMessage]()
-                        }
+                if(_bufferedDataList.size > 0) {
+                    _bufferedDataList.synchronized {
+                        save(_bufferedDataList)
+                        _bufferedDataList = List[TokenMessage]()
                     }
-
-                    // Slow down the consume speed.
-                    Thread.sleep(conf.kafka_consumer_consumeInterval)
-
-                } catch {
-                    case e: Exception => // Ignore
                 }
 
-            })
+                // Slow down the consume speed.
+                Thread.sleep(conf.kafka_consumer_consumeInterval)
 
-            if(_bufferedDataList.size > 0) {
-                _bufferedDataList.synchronized {
-                    save(_bufferedDataList)
-                    _bufferedDataList = List[TokenMessage]()
-                }
+            } catch {
+                case e: Exception => // Ignore
             }
 
+        })
+
+        if(_bufferedDataList.size > 0) {
+            _bufferedDataList.synchronized {
+                save(_bufferedDataList)
+                _bufferedDataList = List[TokenMessage]()
+            }
+        }
+
+        if (_status == "start") {
+            self ! "consume"
+        } else {
+            _status = "stopped"
         }
     }
 
@@ -102,14 +121,24 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
                 else
                     _consumer.subscribe(topics)
 
-                consumeMessage()
+                self ! "consume"
             } else
                 log.error("Didn't find database configuration.")
 
-
+        case "consume" =>
+            consumeMessage()
 
         case "ShutDown" =>
+            _status = "stop"
             _consumer.close()
+
+            _latestConsume.foreach{
+                case (tp: TopicPartition, offset: Long) =>
+                    ZookeeperManager.setTopicPartitionOffset(tp, offset)
+            }
+
+            log.info("Received a shutdown message ------------ !")
+
             context.stop(self)
     }
 

@@ -4,13 +4,13 @@ import java.io.FileInputStream
 import java.util.Properties
 
 import akka.actor.{Props, ActorSystem}
-import com.ftchinese.jobs.common.JobsConfig
+import com.ftchinese.jobs.common.{Logging, JobsConfig}
 
 /**
  * Consume app token message from kafka.
  * Created by wanbo on 3/14/16.
  */
-object ReceiveToken {
+object ReceiveToken extends Logging {
 
     protected val conf = new JobsConfig
 
@@ -32,7 +32,8 @@ object ReceiveToken {
         val kafkaConf = new Properties()
 
         kafkaConf.put("bootstrap.servers", "SIG01:9091,SIG01:9092,SIG01:9093")
-        kafkaConf.put("group.id", "test")
+        //kafkaConf.put("group.id", "test")
+        kafkaConf.put("group.id", "ftc-push")
 
         val topics = Array("apptoken")
 
@@ -47,7 +48,7 @@ object ReceiveToken {
 
                 worker ! "ShutDown"
                 try {
-                    Thread.sleep(1000)
+                    Thread.sleep(10000)
                 } catch {
                     case e: Exception => // Ignore
                 }
