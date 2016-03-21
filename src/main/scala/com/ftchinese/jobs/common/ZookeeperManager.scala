@@ -32,6 +32,7 @@ object ZookeeperManager extends Logging {
         var offset = -1L
 
         val node = topics_node + "/" + tp.topic() + "/" + tp.partition()
+
         if(_zk.exists(node)){
             try {
                 val oData = _zk.get(node)
