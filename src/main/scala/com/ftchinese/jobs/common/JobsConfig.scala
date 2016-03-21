@@ -11,11 +11,25 @@ import scala.xml.XML
  */
 class JobsConfig {
 
+    var zk_hosts = ""
+
+    var kafka_consumer_defaultOffset: Long = 0
+
     var kafka_consumer_consumeInterval: Int = 0
 
     var driverSettings = Map[String, Map[String, String]]()
 
     def parseConf(confProps: Properties): Unit = {
+
+        zk_hosts = confProps.getProperty("zookeeper.hosts", "")
+
+        val ofs = confProps.getProperty("consumer.consume.defaultOffset", "0")
+
+        if(ofs.forall(_.isDigit)) {
+            val ofsInt = ofs.toLong
+            if(ofsInt > 0)
+                kafka_consumer_defaultOffset = ofsInt
+        }
 
         kafka_consumer_consumeInterval = confProps.getProperty("consumer.consume.interval", "0").toInt
 
