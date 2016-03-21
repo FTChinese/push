@@ -32,8 +32,7 @@ object ReceiveToken extends Logging {
         val kafkaConf = new Properties()
 
         kafkaConf.put("bootstrap.servers", "SIG01:9091,SIG01:9092,SIG01:9093")
-        //kafkaConf.put("group.id", "test")
-        kafkaConf.put("group.id", "ftc-push")
+        kafkaConf.put("group.id", conf.kafka_consumer_groupId)
 
         val topics = Array("apptoken")
 

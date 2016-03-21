@@ -13,6 +13,8 @@ class JobsConfig {
 
     var zk_hosts = ""
 
+    var kafka_consumer_groupId: String = ""
+
     var kafka_consumer_defaultOffset: Long = 0
 
     var kafka_consumer_consumeInterval: Int = 0
@@ -22,6 +24,8 @@ class JobsConfig {
     def parseConf(confProps: Properties): Unit = {
 
         zk_hosts = confProps.getProperty("zookeeper.hosts", "")
+
+        kafka_consumer_groupId = confProps.getProperty("consumer.consume.groupId", "")
 
         val ofs = confProps.getProperty("consumer.consume.defaultOffset", "0")
 
