@@ -2,7 +2,7 @@ package com.ftchinese.jobs.handlers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.ftchinese.jobs.common.{NotificationMessage, ZookeeperClient, JobsConfig, Logging}
+import com.ftchinese.jobs.common.{JobsConfig, Logging, NotificationMessage}
 import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
 import com.ftchinese.jobs.pages.{PageTemplate, WebPage}
 import org.eclipse.jetty.server.Request
@@ -48,6 +48,7 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
 
                     // Do some work
                     // Need to create task queue, new task will push into the queue.
+                    // Keep each task is unique in the queue.
                     // Every task in the queue will running in a new thread.
                     val nl = produceNotification(conf.fetchDriverConf("analytic", "mysql"), (message, action, id))
 
