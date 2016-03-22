@@ -28,11 +28,12 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>./src/main/resources</directory>
-            <outputDirectory>/conf</outputDirectory>
+            <directory>./src/main/resources/static</directory>
+            <outputDirectory>/webapp/static</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
+            <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
             <directory>target</directory>
