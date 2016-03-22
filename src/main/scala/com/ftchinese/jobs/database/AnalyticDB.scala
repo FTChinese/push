@@ -65,24 +65,32 @@ class AnalyticDB {
     }
 
     /**
-     * Get area list
+     * Get token list
      * @return
      */
-    def getAreas: List[(String, String)] ={
-        var retList = List[(String, String)]()
+    def getTokens(from: Long = 0, to: Long = 1): List[Map[String, String]] ={
+        var dataList = List[Map[String, String]]()
 
         try{
 
             if(_conn == null || _conn.isClosed)
                 getConnection()
 
-            val sql = "SELECT area_id,short_title area FROM hrdata.tb_area where pid=0;"
+            val sql = "SELECT * FROM analytic.ios_device_token where device_token = '67fdeeda6a38229f5e6c340a2012b3a65deba86799aadfa5fe5d3b514ef83c0f' order by time_stamp desc limit %d, %d;".format(from, to)
 
             val ps = _conn.prepareStatement(sql)
             val rs = ps.executeQuery()
 
+            val metaData = ps.getMetaData
+            val columnCount = metaData.getColumnCount
             while (rs.next()){
-                retList = retList :+ (rs.getString(1), rs.getString(2))
+                var tmpMap = Map[String, String]()
+
+                for(i <- Range(1, columnCount + 1)) {
+                    tmpMap = tmpMap + (metaData.getColumnLabel(i) -> rs.getString(i))
+                }
+
+                dataList = dataList :+ tmpMap
             }
 
         } catch {
@@ -90,7 +98,7 @@ class AnalyticDB {
                 throw e
         }
 
-        retList
+        dataList
     }
 
     /**
