@@ -11,6 +11,10 @@ import scala.xml.XML
  */
 class JobsConfig {
 
+    var serverHost: String = ""
+
+    var serverUIPort: Int = 8080
+
     var zk_hosts = ""
 
     var kafka_consumer_groupId: String = ""
@@ -22,6 +26,19 @@ class JobsConfig {
     var driverSettings = Map[String, Map[String, String]]()
 
     def parseConf(confProps: Properties): Unit = {
+
+        serverHost = confProps.getProperty("server.ui.host", "localhost")
+        val tmpPort = confProps.getProperty("server.ui.port", "8080")
+
+        if(tmpPort.forall(_.isDigit)){
+            try {
+                val intPort = tmpPort.toInt
+                if(intPort > 0)
+                    serverUIPort = intPort
+            } catch {
+                case e: Exception => // Ignore
+            }
+        }
 
         zk_hosts = confProps.getProperty("zookeeper.hosts", "")
 
