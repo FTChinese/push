@@ -2,7 +2,8 @@ package com.ftchinese.jobs.handlers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.ftchinese.jobs.common.{JobsConfig, Logging, NotificationMessage}
+import com.ftchinese.jobs.{PushTaskQueue, PushTaskWorker}
+import com.ftchinese.jobs.common.{TaskMessage, JobsConfig, Logging, NotificationMessage}
 import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
 import com.ftchinese.jobs.pages.{PageTemplate, WebPage}
 import org.eclipse.jetty.server.Request
@@ -26,12 +27,11 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
             httpServletResponse.setStatus(HttpServletResponse.SC_OK)
 
             log.info("Response contents ------------ server")
+            page.title = "Home"
 
             val out = httpServletResponse.getWriter
 
             if(requestMethod == "POST") {
-                page.title = "Home"
-
 
                 val parameters = request.getParameterMap
 
@@ -42,7 +42,7 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                 log.info("Receive a message: %s, action: %s, id: %s".format(message, action, id))
 
                 if(message.isEmpty || action.isEmpty || id.isEmpty){
-                    page.content = failed()
+                    page.content = failed("Every field must be nonempty!")
                     out.println(PageTemplate.commonNavigationPage(page))
                 } else {
 
@@ -50,21 +50,22 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                     // Need to create task queue, new task will push into the queue.
                     // Keep each task is unique in the queue.
                     // Every task in the queue will running in a new thread.
-                    val nl = produceNotification(conf.fetchDriverConf("analytic", "mysql"), (message, action, id))
 
-                    println(nl)
-                    nl.foreach(x => println(x.toJson))
+                    if(PushTaskQueue.getSize > 0){
+                        page.content = failed("There is another task running!")
+                        out.println(PageTemplate.commonNavigationPage(page))
+                    } else {
+                        new PushTaskWorker(conf, TaskMessage(message, action, id)).run()
 
-                    page.content = success()
-                    out.println(PageTemplate.commonNavigationPage(page))
+                        page.content = success()
+                        out.println(PageTemplate.commonNavigationPage(page))
+                    }
                 }
             } else {
-                page.title = "Home"
                 page.content = makeTable()
 
                 out.println(PageTemplate.commonNavigationPage(page))
             }
-
 
             log.info("Response contents ------------ server finish")
 
@@ -117,45 +118,11 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
         </div>
     }
 
-    private def failed(): Seq[Node] ={
+    private def failed(msg: String): Seq[Node] ={
         <div class="alert alert-danger" role="alert">
-            <strong>Well done!</strong> You successfully create this push notification task.
+            <strong>{msg}</strong>
         </div>
     }
 
-    private def produceNotification(conf: Map[String, String], message: (String, String, String)): List[NotificationMessage] = {
 
-        var notificationList: List[NotificationMessage] = List()
-
-        try {
-
-            val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
-
-            val ds: AnalyticDataSource = ctx.getBean(classOf[AnalyticDataSource])
-            ds.setUrl("jdbc:mysql://" + conf.get("host").get + ":3306/analytic?characterEncoding=utf-8")
-            ds.setUsername(conf.get("uname").get)
-            ds.setPassword(conf.get("upswd").get)
-
-            val _analytic = ctx.getBean(classOf[AnalyticDB])
-            _analytic.setDataSource(ds)
-
-
-
-            val dataList = _analytic.getTokens(0)
-
-            notificationList = dataList.map(x => {
-                val device_token = x.getOrElse("device_token", "")
-                val device_type = x.getOrElse("device_type", "")
-                val app_number = x.getOrElse("app_number", "")
-                val timezone = x.getOrElse("timezone", "")
-                NotificationMessage(device_token, device_type, app_number, timezone, message._1, message._2, message._3)
-            })
-
-        } catch {
-            case e:Exception =>
-                log.error("Read data error message:", e)
-        }
-
-        notificationList
-    }
 }
