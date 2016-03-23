@@ -17,6 +17,8 @@ class JobsConfig {
 
     var zk_hosts = ""
 
+    var kafka_bootstrap_servers: String = ""
+
     var kafka_consumer_groupId: String = ""
 
     var kafka_consumer_defaultOffset: Long = 0
@@ -41,6 +43,8 @@ class JobsConfig {
         }
 
         zk_hosts = confProps.getProperty("zookeeper.hosts", "")
+
+        kafka_bootstrap_servers = confProps.getProperty("kafka.bootstrap.servers", "")
 
         kafka_consumer_groupId = confProps.getProperty("consumer.consume.groupId", "")
 
