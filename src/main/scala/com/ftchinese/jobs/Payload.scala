@@ -1,5 +1,6 @@
 package com.ftchinese.jobs
 
+import scala.util.parsing.json.JSONFormat._
 import scala.util.parsing.json.JSONObject
 
 
@@ -45,14 +46,35 @@ class Payload() {
     }
 
     def getPayload: String = {
+        var tmp: Map[String, Any] = customs
 
-        val apsJson = JSONObject.apply(aps)
+        tmp = tmp + ("aps" -> aps)
 
-        customs = customs.updated("aps", apsJson.toString())
-
-        val jsonArr = JSONObject.apply(customs)
-
-        jsonArr.toString()
+        mapToJson(tmp)
     }
 
+    def mapToJson(data: Map[String, Any]): String ={
+
+        val ret = data.map( item => {
+            item._2 match {
+                case v: String =>
+                    item._1 -> v
+                case x: Map[_, _] =>
+
+                    val tmp = mapToJson(x.asInstanceOf[Map[String, Any]])
+                    item._1 -> tmp.substring(0, tmp.length)
+            }
+        })
+
+        val formatter: ValueFormatter = {
+            case s: String =>
+                if(s.startsWith("{")){
+                    s
+                } else {
+                    "\"" + s + "\""
+                }
+        }
+
+        JSONObject.apply(ret).toString(formatter)
+    }
 }
