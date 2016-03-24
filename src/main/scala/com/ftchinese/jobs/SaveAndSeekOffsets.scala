@@ -34,8 +34,8 @@ class SaveAndSeekOffsets(consumer: KafkaConsumer[String, String], defaultOffset:
                 log.info("The consumer was assigned the default offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), defaultOffset))
                 consumer.seek(tp, defaultOffset)
             } else if (storedOffset > 0) {
-                log.info("The consumer was assigned the stored offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), storedOffset))
-                consumer.seek(tp, storedOffset)
+                log.info("The consumer was assigned the stored offset [%s] [%d] [%d] ...!".format(tp.topic(), tp.partition(), storedOffset + 1))
+                consumer.seek(tp, storedOffset + 1)
             } else {
                 log.info("There is no offset settings, so consume automatically.!")
             }
