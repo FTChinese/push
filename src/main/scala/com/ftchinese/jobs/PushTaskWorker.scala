@@ -18,8 +18,6 @@ class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread 
 
         val nl = produceNotification(conf.fetchDriverConf("analytic", "mysql"), taskMessage)
 
-        nl.foreach(x => println(x.toJson))
-
         val kafkaProps = Map("kafka_topic" -> "push_notification", "kafka_host" -> conf.kafka_bootstrap_servers)
 
         if(nl.size > 0){
@@ -45,15 +43,23 @@ class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread 
             val _analytic = ctx.getBean(classOf[AnalyticDB])
             _analytic.setDataSource(ds)
 
-            val dataList = _analytic.getTokens(0)
+            val batchSize = 10
+            var batchIndex = 0
 
-            notificationList = dataList.map(x => {
-                val device_token = x.getOrElse("device_token", "")
-                val device_type = x.getOrElse("device_type", "")
-                val app_number = x.getOrElse("app_number", "")
-                val timezone = x.getOrElse("timezone", "")
-                NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.id)
-            })
+            var dataList = _analytic.getTokens(batchIndex, batchSize)
+
+            while (dataList.size > 0 && notificationList.size < 100) {
+                notificationList = notificationList ++ dataList.map(x => {
+                    val device_token = x.getOrElse("device_token", "")
+                    val device_type = x.getOrElse("device_type", "")
+                    val app_number = x.getOrElse("app_number", "")
+                    val timezone = x.getOrElse("timezone", "")
+                    NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.id)
+                })
+
+                batchIndex = batchIndex + batchSize
+                dataList = _analytic.getTokens(batchIndex, batchSize)
+            }
 
         } catch {
             case e:Exception =>
