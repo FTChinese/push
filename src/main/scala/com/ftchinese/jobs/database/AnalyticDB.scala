@@ -76,13 +76,14 @@ class AnalyticDB {
             if(_conn == null || _conn.isClosed)
                 getConnection()
 
-            val sql = "SELECT * FROM analytic.ios_device_token where device_token = '67fdeeda6a38229f5e6c340a2012b3a65deba86799aadfa5fe5d3b514ef83c0f' order by time_stamp desc limit %d, %d;".format(from, to)
+            val sql = "SELECT * FROM analytic.ios_device_token where `timezone` = 'GMT 8' and device_type = 'phone' order by time_stamp desc limit %d, %d;".format(from, to)
 
             val ps = _conn.prepareStatement(sql)
             val rs = ps.executeQuery()
 
             val metaData = ps.getMetaData
             val columnCount = metaData.getColumnCount
+
             while (rs.next()){
                 var tmpMap = Map[String, String]()
 
