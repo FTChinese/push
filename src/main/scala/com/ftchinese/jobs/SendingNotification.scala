@@ -5,6 +5,7 @@ import java.util.Properties
 
 import akka.actor.{ActorSystem, Props}
 import com.ftchinese.jobs.common.JobsConfig
+import com.ftchinese.jobs.push.PushReceiver
 
 /**
  * Consume app token message from kafka.

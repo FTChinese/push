@@ -1,4 +1,4 @@
-package com.ftchinese.jobs
+package com.ftchinese.jobs.push
 
 import scala.util.parsing.json.JSONFormat._
 import scala.util.parsing.json.JSONObject
