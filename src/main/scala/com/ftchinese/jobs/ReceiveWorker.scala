@@ -4,7 +4,7 @@ import java.util.Properties
 
 import akka.actor.Actor
 import com.alibaba.fastjson.JSON
-import com.ftchinese.jobs.common.{JobsConfig, Logging, TokenMessage, ZookeeperManager}
+import com.ftchinese.jobs.common._
 import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
