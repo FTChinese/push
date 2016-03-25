@@ -1,14 +1,12 @@
-package com.ftchinese.jobs.handlers
+package com.ftchinese.jobs.ui.handlers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.ftchinese.jobs.{PushTaskQueue, PushTaskWorker}
-import com.ftchinese.jobs.common.{TaskMessage, JobsConfig, Logging, NotificationMessage}
-import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
-import com.ftchinese.jobs.pages.{PageTemplate, WebPage}
+import com.ftchinese.jobs.common.{JobsConfig, Logging, TaskMessage}
+import com.ftchinese.jobs.ui.{PushTaskQueue, PushTaskWorker}
+import com.ftchinese.jobs.ui.pages.{PageTemplate, WebPage}
 import org.eclipse.jetty.server.Request
 import org.eclipse.jetty.server.handler.{AbstractHandler, ContextHandler}
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import scala.xml.Node
 
