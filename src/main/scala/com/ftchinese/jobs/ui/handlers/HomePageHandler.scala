@@ -35,11 +35,12 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
 
                 val message = parameters.getOrDefault("message", Array("")).apply(0)
                 val action = parameters.getOrDefault("action", Array("")).apply(0)
-                val id = parameters.getOrDefault("id", Array("")).apply(0)
+                val label = parameters.getOrDefault("label", Array("")).apply(0)
+                val test = parameters.getOrDefault("test", Array("")).apply(0)
 
-                log.info("Receive a message: %s, action: %s, id: %s".format(message, action, id))
+                log.info("Receive a message: %s, action: %s, label: %s, test: %s".format(message, action, label, test))
 
-                if(message.isEmpty || action.isEmpty || id.isEmpty){
+                if(message.isEmpty || action.isEmpty || label.isEmpty){
                     page.content = failed("Every field must be nonempty!")
                     out.println(PageTemplate.commonNavigationPage(page))
                 } else {
@@ -53,7 +54,11 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                         page.content = failed("There is another task running!")
                         out.println(PageTemplate.commonNavigationPage(page))
                     } else {
-                        new PushTaskWorker(conf, TaskMessage(message, action, id)).run()
+
+                        if(test == "")
+                            new PushTaskWorker(conf, TaskMessage(message, action, label)).run()
+                        else
+                            new PushTaskWorker(conf, TaskMessage(message, action, label, production = false)).run()
 
                         page.content = success()
                         out.println(PageTemplate.commonNavigationPage(page))
@@ -100,8 +105,14 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                 </div>
                 <br />
                 <div class="input-group">
-                    <label for="id">Action to do:</label>
-                    <input id="id" name="id" type="text" placeholder="Video ID or Story ID or Page URL" class="form-control"></input>
+                    <label for="label">Action to do:</label>
+                    <input id="label" name="label" type="text" placeholder="Video ID/Story ID/Tag/Page URL" class="form-control"></input>
+                </div>
+                <br />
+                <div class="input-group" data-toggle="buttons">
+                    <label class="btn btn-primary">
+                        <input id="test" name="test" type="checkbox" autocomplete="off">Test</input>
+                    </label>
                 </div>
                 <br />
                 <div class="input-group">
