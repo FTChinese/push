@@ -17,8 +17,8 @@ class PushServerManager(keyName: String, keyPassword: String) {
             server_host = AppleServer.pro_host
             server_port = AppleServer.pro_port
         } else {
-            server_host = AppleServer.pro_host
-            server_port = AppleServer.pro_port
+            server_host = AppleServer.dev_host
+            server_port = AppleServer.dev_port
         }
 
         val context = SSLContext.getInstance("TLS")
