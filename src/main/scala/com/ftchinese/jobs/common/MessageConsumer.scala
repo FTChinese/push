@@ -1,8 +1,8 @@
-package com.ftchinese.jobs
+package com.ftchinese.jobs.common
 
 import java.util.Properties
 
-import com.ftchinese.jobs.common.Logging
+import com.ftchinese.jobs.SaveAndSeekOffsets
 import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
 import org.slf4j.MDC
 
