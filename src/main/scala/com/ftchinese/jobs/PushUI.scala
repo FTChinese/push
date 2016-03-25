@@ -3,10 +3,9 @@ package com.ftchinese.jobs
 import java.io.FileInputStream
 import java.util.Properties
 
-import akka.actor.{ActorSystem, Props}
 import com.ftchinese.jobs.common.{HttpServer, JobsConfig, Logging}
-import com.ftchinese.jobs.handlers.HomePageHandler
-import com.ftchinese.jobs.pages.{HomePage, PageTab, WebPage}
+import com.ftchinese.jobs.ui.handlers.HomePageHandler
+import com.ftchinese.jobs.ui.pages.{HomePage, PageTab, WebPage}
 import org.eclipse.jetty.server.handler.ResourceHandler
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.slf4j.MDC
