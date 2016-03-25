@@ -1,4 +1,4 @@
-package com.ftchinese.jobs
+package com.ftchinese.jobs.ui
 
 import com.ftchinese.jobs.common.Logging
 
