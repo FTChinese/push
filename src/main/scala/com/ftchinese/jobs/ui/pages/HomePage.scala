@@ -1,4 +1,4 @@
-package com.ftchinese.jobs.pages
+package com.ftchinese.jobs.ui.pages
 
 /**
  * The home page.
