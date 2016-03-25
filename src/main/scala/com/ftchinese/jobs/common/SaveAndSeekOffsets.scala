@@ -1,8 +1,7 @@
-package com.ftchinese.jobs
+package com.ftchinese.jobs.common
 
 import java.util
 
-import com.ftchinese.jobs.common.{Logging, ZookeeperManager}
 import org.apache.kafka.clients.consumer.{ConsumerRebalanceListener, KafkaConsumer}
 import org.apache.kafka.common.TopicPartition
 
