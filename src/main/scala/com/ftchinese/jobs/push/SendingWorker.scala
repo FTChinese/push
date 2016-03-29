@@ -17,6 +17,9 @@ class SendingWorker() extends Actor with Logging {
         case notificationMessage: NotificationMessage =>
 
             if(validateNotification(notificationMessage)){
+
+                //log.info(notificationMessage.toJson)
+
                 send(notificationMessage)
             } else {
                 log.warn("This is not a valid notification !! " + notificationMessage.toJson)
@@ -48,6 +51,10 @@ class SendingWorker() extends Actor with Logging {
     def send(note: NotificationMessage): Unit ={
 
         try {
+
+            log.info("------------ Start to send [%d] ------------".format(note.id))
+            log.info("Sending details:" + note.toJson)
+
             val pushServer = new PushServerManager(note.deviceType + note.appNumber, "")
 
             val socket = pushServer.getPushServer(note.production)
@@ -59,12 +66,12 @@ class SendingWorker() extends Actor with Logging {
             payload.setSound(note.sound)
 
             payload.addCustomDictionary("action", note.action)
-            payload.addCustomDictionary("id", note.id)
+            payload.addCustomDictionary("id", note.label)
             payload.addCustomDictionary("lead", note.lead)
 
             val out = socket.getOutputStream
 
-            out.write(payloadStream(id = 1, token = note.deviceToken, payload = payload.getPayload).toByteArray)
+            out.write(payloadStream(id = note.id, token = note.deviceToken, payload = payload.getPayload).toByteArray)
 
             out.flush()
 
@@ -107,11 +114,11 @@ class SendingWorker() extends Actor with Logging {
 
         bao.write(intTo4ByteArray(3))
 
-        bao.write(intTo2ByteArray(tokenBytes.size))
+        bao.write(intTo2ByteArray(tokenBytes.length))
 
         bao.write(tokenBytes)
 
-        bao.write(intTo2ByteArray(payload.getBytes("UTF-8").size))
+        bao.write(intTo2ByteArray(payload.getBytes("UTF-8").length))
 
         bao.write(payload.getBytes("UTF-8"))
 
