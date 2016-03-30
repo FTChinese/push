@@ -15,80 +15,82 @@ import scala.util.Random
  */
 class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread with Logging {
 
+    private var _analytic: AnalyticDB = _
+
     override def run(): Unit ={
-        PushTaskQueue.push(new PushTask)
-
-        val nl = produceNotification(conf.fetchDriverConf("analytic", "mysql"))
-
-        val kafkaProps = Map("kafka_topic" -> "push_notification", "kafka_host" -> conf.kafka_bootstrap_servers)
-
-        if(nl.size > 0){
-            pushToKafka(kafkaProps, nl.map(_.toJson))
-            //nl.map(_.toJson).foreach(log.info)
-        }
-
-        PushTaskQueue.pull()
-    }
-
-    private def produceNotification(conf: Map[String, String]): List[NotificationMessage] = {
-
-        var notificationList: List[NotificationMessage] = List()
 
         try {
+
+            // Database instance initialization.
+            val dbConf = conf.fetchDriverConf("analytic", "mysql")
 
             val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
 
             val ds: AnalyticDataSource = ctx.getBean(classOf[AnalyticDataSource])
-            ds.setUrl("jdbc:mysql://" + conf.get("host").get + ":3306/analytic?characterEncoding=utf-8")
-            ds.setUsername(conf.get("uname").get)
-            ds.setPassword(conf.get("upswd").get)
+            ds.setUrl("jdbc:mysql://" + dbConf.get("host").get + ":3306/analytic?characterEncoding=utf-8")
+            ds.setUsername(dbConf.get("uname").get)
+            ds.setPassword(dbConf.get("upswd").get)
 
-            val _analytic = ctx.getBean(classOf[AnalyticDB])
+            _analytic = ctx.getBean(classOf[AnalyticDB])
             _analytic.setDataSource(ds)
 
-            val batchSize = 10
+            // Register a task
+            PushTaskQueue.push(new PushTask)
+
+            var totalSize = 0
+
             var batchIndex = 0
+            val batchSize  = 100
+
+            val kafkaProps = Map("kafka_topic" -> "push_notification", "kafka_host" -> conf.kafka_bootstrap_servers)
+            var nl = produceNotification(batchIndex, batchSize)
+
+            while (nl.nonEmpty && totalSize < 2000) {
+
+                pushToKafka(kafkaProps, nl.map(_.toJson))
+                //nl.map(_.toJson).foreach(log.info)
+
+                totalSize += nl.size
+
+                batchIndex = batchIndex + batchSize
+                nl = produceNotification(batchIndex, batchSize)
+            }
+
+            // Unregister task
+            PushTaskQueue.pull()
+        } catch {
+            case e: Exception =>
+                log.error("Error:", e)
+        }
+    }
+
+    private def produceNotification(batchIndex: Int, batchSize: Int): List[NotificationMessage] = {
+
+        var notificationList: List[NotificationMessage] = List()
+
+        try {
 
             var dataList = List[Map[String, String]]()
 
             if (taskMessage.production){
                 log.info("-------------[Production mode]-------------")
                 dataList = _analytic.getTokens(batchIndex, batchSize)
-
-                while (dataList.size > 0 && notificationList.size < 100) {
-                    notificationList = notificationList ++ dataList.map(x => {
-                        val device_token = x.getOrElse("device_token", "")
-                        val device_type = x.getOrElse("device_type", "")
-                        val app_number = x.getOrElse("app_number", "")
-                        val timezone = x.getOrElse("timezone", "")
-
-                        val id = generateId
-
-                        NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.label, "", "1", "default", id, taskMessage.production, taskMessage.createTime)
-                    })
-
-                    batchIndex = batchIndex + batchSize
-                    dataList = _analytic.getTokens(batchIndex, batchSize)
-                }
             } else {
                 log.info("-------------[Test mode]-------------")
                 dataList = _analytic.getTestTokens(batchIndex, batchSize)
+            }
 
-                while (dataList.size > 0 && notificationList.size < 100) {
-                    notificationList = notificationList ++ dataList.map(x => {
-                        val device_token = x.getOrElse("device_token", "")
-                        val device_type = x.getOrElse("device_type", "")
-                        val app_number = x.getOrElse("app_number", "")
-                        val timezone = x.getOrElse("timezone", "")
+            if (dataList.nonEmpty) {
+                notificationList = dataList.map(x => {
+                    val device_token = x.getOrElse("device_token", "")
+                    val device_type = x.getOrElse("device_type", "")
+                    val app_number = x.getOrElse("app_number", "")
+                    val timezone = x.getOrElse("timezone", "")
 
-                        val id = generateId
+                    val id = generateId
 
-                        NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.label, "", "1", "default", id, taskMessage.production, taskMessage.createTime)
-                    })
-
-                    batchIndex = batchIndex + batchSize
-                    dataList = _analytic.getTestTokens(batchIndex, batchSize)
-                }
+                    NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.label, "", "1", "default", id, taskMessage.production, taskMessage.createTime)
+                })
             }
 
         } catch {
