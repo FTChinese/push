@@ -76,7 +76,7 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
                     _bufferedDataList = _bufferedDataList :+ TokenMessage(deviceToken, timeZone, status, preference, deviceType, appNumber, timestamp)
                 })
 
-                if(_bufferedDataList.size > 0) {
+                if(_bufferedDataList.nonEmpty) {
                     _bufferedDataList.synchronized {
                         save(_bufferedDataList)
                         _bufferedDataList = List[TokenMessage]()
@@ -92,7 +92,7 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
         })
 
-        if(_bufferedDataList.size > 0) {
+        if(_bufferedDataList.nonEmpty) {
             _bufferedDataList.synchronized {
                 save(_bufferedDataList)
                 _bufferedDataList = List[TokenMessage]()
@@ -113,7 +113,7 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
             _dbConf = conf.fetchDriverConf("analytic", "mysql")
 
-            if(_dbConf.size > 0) {
+            if(_dbConf.nonEmpty) {
 
                 // 85792L
                 if (conf.kafka_consumer_defaultOffset > 0)
