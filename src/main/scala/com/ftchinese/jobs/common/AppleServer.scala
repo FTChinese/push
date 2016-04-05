@@ -6,8 +6,8 @@ package com.ftchinese.jobs.common
   */
 trait AppleServer {
     val pro_host: String = ""
-    val pro_port: Int = _
+    val pro_port: Int = 0
 
     val dev_host: String = ""
-    val dev_port: Int = _
+    val dev_port: Int = 0
 }
