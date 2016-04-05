@@ -3,6 +3,8 @@ package com.ftchinese.jobs.push
 import java.net.Socket
 import javax.net.ssl.{KeyManagerFactory, SSLContext}
 
+import com.ftchinese.jobs.common.KeystoreManager
+
 /**
  * Push server manager.
  * Created by wanbo on 16/3/21.

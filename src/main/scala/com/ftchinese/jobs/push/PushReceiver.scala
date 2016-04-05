@@ -103,7 +103,7 @@ class PushReceiver(topics: Array[String], kafkaConf: Properties, conf: JobsConfi
                     _bufferedDataList = _bufferedDataList :+ NotificationMessage(deviceToken, deviceType, appNumber, timeZone, text, action, label, lead, badge, sound, id, production, createTime)
                 })
 
-                if(_bufferedDataList.size > 0) {
+                if(_bufferedDataList.nonEmpty) {
                     _bufferedDataList.synchronized {
                         send(_bufferedDataList)
                         _bufferedDataList = List[NotificationMessage]()
@@ -119,7 +119,7 @@ class PushReceiver(topics: Array[String], kafkaConf: Properties, conf: JobsConfi
 
         })
 
-        if(_bufferedDataList.size > 0) {
+        if(_bufferedDataList.nonEmpty) {
             _bufferedDataList.synchronized {
                 send(_bufferedDataList)
                 _bufferedDataList = List[NotificationMessage]()

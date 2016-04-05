@@ -1,9 +1,7 @@
-package com.ftchinese.jobs.push
+package com.ftchinese.jobs.common
 
 import java.io.FileInputStream
 import java.security.KeyStore
-
-import com.ftchinese.jobs.common.Logging
 
 /**
  * Keystore manager
