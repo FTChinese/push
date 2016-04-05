@@ -14,11 +14,11 @@ class PushServerManager(keyName: String, keyPassword: String) {
     def getPushServer(production: Boolean): Socket ={
 
         if(production){
-            server_host = AppleServer.pro_host
-            server_port = AppleServer.pro_port
+            server_host = PushServer.pro_host
+            server_port = PushServer.pro_port
         } else {
-            server_host = AppleServer.dev_host
-            server_port = AppleServer.dev_port
+            server_host = PushServer.dev_host
+            server_port = PushServer.dev_port
         }
 
         val context = SSLContext.getInstance("TLS")
