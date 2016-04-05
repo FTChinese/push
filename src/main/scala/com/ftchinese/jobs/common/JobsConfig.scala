@@ -27,6 +27,8 @@ class JobsConfig {
 
     var driverSettings = Map[String, Map[String, String]]()
 
+    var update_token_intervalMillis: Int = 7200000
+
     def parseConf(confProps: Properties): Unit = {
 
         serverHost = confProps.getProperty("server.ui.host", "localhost")
@@ -100,9 +102,11 @@ class JobsConfig {
         } catch {
             case e: Exception => // Ignore the file opening exceptions.
         }
+
+        update_token_intervalMillis = confProps.getProperty("update.token.interval.millis", "7200000").toInt
     }
 
     def fetchDriverConf(dbName: String = "", dbType: String = "", writable: String = "true"): Map[String, String] = {
-        driverSettings.map(_._2).filter(x => x.getOrElse("dbname", "") == dbName && x.getOrElse("type", "") == dbType && x.getOrElse("writable", "true") == writable).last
+        driverSettings.values.filter(x => x.getOrElse("dbname", "") == dbName && x.getOrElse("type", "") == dbType && x.getOrElse("writable", "true") == writable).last
     }
 }
