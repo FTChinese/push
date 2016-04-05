@@ -90,7 +90,7 @@ then
 	echo LOG CONFIGURATION : ${logback_configurationFile}
 	echo Easy conf : ${easy_conf}
 	echo CLASSPATH :${CLASSPATH}
-	${JAVA} ${JAVA_OPTS} ${JAVA_DEBUG_OPT} ${EASY_OPTS} -classpath .:${CLASSPATH} com.ftchinese.jobs.SendingNotification 1>>${base}/logs/update_token.log 2>&1 &
+	${JAVA} ${JAVA_OPTS} ${JAVA_DEBUG_OPT} ${EASY_OPTS} -classpath .:${CLASSPATH} com.ftchinese.jobs.UpdateToken 1>>${base}/logs/update_token.log 2>&1 &
 	echo $! > ${base}/bin/update_token.pid
 	
 	echo "cd to $current_path for continue"
