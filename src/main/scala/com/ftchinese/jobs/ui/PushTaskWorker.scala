@@ -45,7 +45,7 @@ class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread 
             val kafkaProps = Map("kafka_topic" -> "push_notification", "kafka_host" -> conf.kafka_bootstrap_servers)
             var nl = produceNotification(batchIndex, batchSize)
 
-            while (nl.nonEmpty && totalSize < 2000) {
+            while (nl.nonEmpty && totalSize < 6000) {
 
                 pushToKafka(kafkaProps, nl.map(_.toJson))
                 //nl.map(_.toJson).foreach(log.info)
