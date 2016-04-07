@@ -74,7 +74,7 @@ class AnalyticDB extends Logging {
             if(_conn == null || _conn.isClosed)
                 connection()
 
-            val sql = "SELECT * FROM analytic.ios_device_token where `timezone` = 'GMT 8' and device_type = 'phone' order by time_stamp desc limit %d, %d;".format(from, to)
+            val sql = "SELECT * FROM analytic.ios_device_token where `timezone` = 'GMT 8' and device_type = 'phone' order by time_stamp asc limit %d, %d;".format(from, to)
 
             log.info(sql)
 
