@@ -1,6 +1,6 @@
 package com.ftchinese.jobs.update
 
-import java.io.{BufferedReader, ByteArrayOutputStream, InputStreamReader}
+import java.io.ByteArrayOutputStream
 
 import akka.actor.Actor
 import com.ftchinese.jobs.common._
@@ -36,12 +36,15 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
                 if(receiveData.length > 0){
                     loadData(receiveData)
 
+                    log.info(_bufferedDataList.size.toString + " tokens was found!")
+
                     if (_bufferedDataList.nonEmpty) {
                         _bufferedDataList.synchronized {
                             delete(_bufferedDataList)
                             _bufferedDataList = List[UpdateTokenMessage]()
                         }
                     }
+
                 } else {
                     // Slow down the consume speed.
                     Thread.sleep(conf.update_token_intervalMillis)
@@ -69,8 +72,9 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
         try {
 
             if(data.length > 0){
-                val tuple = data.sliding(_feedback_tuple_size, _feedback_tuple_size)
+                val tuple = data.sliding(_feedback_tuple_size, _feedback_tuple_size).toList
 
+                log.info(data.length.toString)
                 log.info("Found %d tuples.".format(tuple.length))
 
                 tuple.foreach(t => {
@@ -83,11 +87,16 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
 
                     val deviceTokenLength = t(4) << 8 | t(5)
 
-                    val deviceToken = t.slice(6, deviceTokenLength).map(x => {
+                    log.info("device token length:" + deviceTokenLength)
+
+                    val deviceToken = t.slice(6, _feedback_tuple_size).map(x => {
                         "%02x".format(0x000000FF & x.toInt)
                     }).mkString
 
-                    _bufferedDataList = _bufferedDataList :+ UpdateTokenMessage(deviceToken, timestamp)
+                    log.info(deviceToken + "---->" + timestamp)
+
+                    if(deviceToken != "")
+                        _bufferedDataList = _bufferedDataList :+ UpdateTokenMessage(deviceToken, timestamp)
                 })
             }
 
@@ -108,18 +117,20 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
 
             val socket = updateServer.getPushServer(true)
 
-            val in = new BufferedReader(new InputStreamReader(socket.getInputStream))
+            val in = socket.getInputStream
             val ooo = new ByteArrayOutputStream()
 
-            var k = in.read()
-            while (k != -1) {
-                ooo.write(k)
-                k = in.read()
+            var rdBytes = in.read()
+            while (rdBytes != -1) {
+                ooo.write(rdBytes)
+                rdBytes = in.read()
             }
 
             data = ooo.toByteArray
 
             log.info("The data size read from feedback service is:" + data.length)
+
+            //data.foreach(x => log.info(x.toInt.toString))
 
             in.close()
 
@@ -135,7 +146,7 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
     override def receive: Receive = {
         case "Start" =>
 
-            ZookeeperManager.init(conf)
+            //ZookeeperManager.init(conf)
 
             _dbConf = conf.fetchDriverConf("analytic", "mysql")
 
@@ -193,18 +204,19 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
 
                 // End batch control
 
-                val sqlStr = new StringBuilder("delete from ios_device_token where device_toke in ")
+                val sqlStr = new StringBuilder("delete from ios_device_token where device_toke in (")
 
                 var dot = ""
                 tempList.foreach(x => {
                     if(x != null){
                         sqlStr.append(dot)
                         dot = ","
-                        sqlStr.append("('")
+                        sqlStr.append("'")
                         sqlStr.append(x.deviceToken)
-                        sqlStr.append("')")
+                        sqlStr.append("'")
                     }
                 })
+                sqlStr.append(")")
 
                 log.info("---------------------------------")
                 log.info("---sql----:" + sqlStr.toString())
