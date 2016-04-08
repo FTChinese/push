@@ -204,7 +204,7 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
 
                 // End batch control
 
-                val sqlStr = new StringBuilder("delete from ios_device_token where device_toke in (")
+                val sqlStr = new StringBuilder("delete from ios_device_token where device_token in (")
 
                 var dot = ""
                 tempList.foreach(x => {
