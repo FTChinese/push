@@ -10,7 +10,7 @@ import scala.util.parsing.json.JSONObject
  */
 class Payload() {
 
-    private var aps: Map[String, String] = Map("alert" -> "", "badge" -> "1", "sound" -> "default")
+    private var aps: Map[String, Any] = Map("alert" -> "", "badge" -> 1, "sound" -> "default")
     private var customs: Map[String, String] = Map()
 
     def setAlert(alert: Any): Unit ={
@@ -23,7 +23,7 @@ class Payload() {
 
     }
 
-    def setBadge(badge: String){
+    def setBadge(badge: Int){
         aps = aps.updated("badge", badge)
     }
 
@@ -57,8 +57,10 @@ class Payload() {
 
         val ret = data.map( item => {
             item._2 match {
-                case v: String =>
-                    item._1 -> v
+                case s: String =>
+                    item._1 -> s
+                case i: Int =>
+                    item._1 -> i
                 case x: Map[_, _] =>
 
                     val tmp = mapToJson(x.asInstanceOf[Map[String, Any]])
@@ -73,6 +75,8 @@ class Payload() {
                 } else {
                     "\"" + s + "\""
                 }
+            case x =>
+                x.toString
         }
 
         JSONObject.apply(ret).toString(formatter)

@@ -58,7 +58,7 @@ class PushReceiver(topics: Array[String], kafkaConf: Properties, conf: JobsConfi
                     var action = ""
                     var label = ""
                     var lead = ""
-                    var badge = "1"
+                    var badge = 1
                     var sound = "default"
 
                     var id: Int = 0
@@ -83,8 +83,12 @@ class PushReceiver(topics: Array[String], kafkaConf: Properties, conf: JobsConfi
                         label = obj.getString("label").trim
                     if(obj.containsKey("lead"))
                         lead = obj.getString("lead").trim
-                    if(obj.containsKey("badge"))
-                        badge = obj.getString("badge").trim
+                    if(obj.containsKey("badge")) {
+                        val tmp = obj.getString("badge").trim
+                        if(tmp != "" && tmp.forall(_.isDigit)) {
+                            badge = tmp.toInt
+                        }
+                    }
                     if(obj.containsKey("sound"))
                         sound = obj.getString("sound").trim
 

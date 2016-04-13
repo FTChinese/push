@@ -69,6 +69,8 @@ class SendingWorker() extends Actor with Logging {
             payload.addCustomDictionary("id", note.label)
             payload.addCustomDictionary("lead", note.lead)
 
+            log.info("Sending payload:" + payload.getPayload)
+
             val out = socket.getOutputStream
 
             out.write(payloadStream(id = note.id, token = note.deviceToken, payload = payload.getPayload).toByteArray)
