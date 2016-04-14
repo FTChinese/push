@@ -89,7 +89,7 @@ class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread 
 
                     val id = generateId
 
-                    NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.label, "", 1, "default", id, taskMessage.production, taskMessage.createTime)
+                    NotificationMessage(device_token, device_type, app_number, timezone, taskMessage.message, taskMessage.action, taskMessage.label, "", 1, taskMessage.sound, id, taskMessage.production, taskMessage.createTime)
                 })
             }
 
