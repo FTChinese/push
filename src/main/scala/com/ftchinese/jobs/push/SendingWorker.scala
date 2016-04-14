@@ -63,7 +63,8 @@ class SendingWorker() extends Actor with Logging {
 
             payload.setAlert(note.text)
             payload.setBadge(note.badge)
-            payload.setSound(note.sound)
+            if(note.sound != "")
+                payload.setSound(note.sound)
 
             payload.addCustomDictionary("action", note.action)
             payload.addCustomDictionary("id", note.label)
