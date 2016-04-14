@@ -10,7 +10,7 @@ import scala.util.parsing.json.JSONObject
  */
 class Payload() {
 
-    private var aps: Map[String, Any] = Map("alert" -> "", "badge" -> 1, "sound" -> "default")
+    private var aps: Map[String, Any] = Map("alert" -> "", "badge" -> 1)
     private var customs: Map[String, String] = Map()
 
     def setAlert(alert: Any): Unit ={
