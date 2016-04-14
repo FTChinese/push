@@ -34,11 +34,12 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                 val parameters = request.getParameterMap
 
                 val message = parameters.getOrDefault("message", Array("")).apply(0)
+                val sound = parameters.getOrDefault("sound", Array("")).apply(0)
                 val action = parameters.getOrDefault("action", Array("")).apply(0)
                 val label = parameters.getOrDefault("label", Array("")).apply(0)
                 val test = parameters.getOrDefault("test", Array("")).apply(0)
 
-                log.info("Receive a message: %s, action: %s, label: %s, test: %s".format(message, action, label, test))
+                log.info("Receive a message: %s, sound: %s, action: %s, label: %s, test: %s".format(message, sound, action, label, test))
 
                 if(message.isEmpty || action.isEmpty || label.isEmpty){
                     page.content = failed("Every field must be nonempty!")
@@ -56,9 +57,9 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                     } else {
 
                         if(test == "")
-                            new PushTaskWorker(conf, TaskMessage(message, action, label)).run()
+                            new PushTaskWorker(conf, TaskMessage(message, sound, action, label)).run()
                         else
-                            new PushTaskWorker(conf, TaskMessage(message, action, label, production = false)).run()
+                            new PushTaskWorker(conf, TaskMessage(message, sound, action, label, production = false)).run()
 
                         page.content = success()
                         out.println(PageTemplate.commonNavigationPage(page))
@@ -91,6 +92,14 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                 </div>
                 <br />
                 <div class="input-group">
+                    <label for="sound">Sound Type:</label>
+                    <select id="sound" name="sound" class="form-control">
+                        <option value="">Mute</option>
+                        <option value="default">Default</option>
+                    </select>
+                </div>
+                <br />
+                <div class="input-group">
                     <label for="action">Action Type:</label>
                     <select id="action" name="action" class="form-control">
                         <option value="story">Story</option>
@@ -105,7 +114,7 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                 </div>
                 <br />
                 <div class="input-group">
-                    <label for="label">Action to do:</label>
+                    <label for="label">Action target:</label>
                     <input id="label" name="label" type="text" placeholder="Video ID/Story ID/Tag/Page URL" class="form-control"></input>
                 </div>
                 <br />
