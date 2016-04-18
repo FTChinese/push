@@ -57,9 +57,9 @@ class HomePageHandler(conf: JobsConfig, contextPath: String, page: WebPage) exte
                     } else {
 
                         if(test == "")
-                            new PushTaskWorker(conf, TaskMessage(message, sound, action, label)).run()
+                            new PushTaskWorker(conf, TaskMessage(message, sound, action, label)).start()
                         else
-                            new PushTaskWorker(conf, TaskMessage(message, sound, action, label, production = false)).run()
+                            new PushTaskWorker(conf, TaskMessage(message, sound, action, label, production = false)).start()
 
                         page.content = success()
                         out.println(PageTemplate.commonNavigationPage(page))
