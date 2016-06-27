@@ -11,8 +11,9 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 class AnalyticDataSource {
     private val ds = new ComboPooledDataSource()
 
-    ds.setMinPoolSize(10)
+    ds.setMinPoolSize(1)
     ds.setMaxPoolSize(100)
+    ds.setAcquireIncrement(1)
 
     def setUrl(url: String): Unit ={
         ds.setJdbcUrl(url)
