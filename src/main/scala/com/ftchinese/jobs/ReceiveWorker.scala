@@ -5,11 +5,10 @@ import java.util.Properties
 import akka.actor.Actor
 import com.alibaba.fastjson.JSON
 import com.ftchinese.jobs.common._
-import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
+import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
 import org.slf4j.MDC
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 
 /**
@@ -146,14 +145,12 @@ class ReceiveWorker(topics: Array[String], kafkaConf: Properties, conf: JobsConf
 
         try {
 
-            val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
-
-            val ds: AnalyticDataSource = ctx.getBean(classOf[AnalyticDataSource])
+            val ds: AnalyticDataSource = new AnalyticDataSource
             ds.setUrl("jdbc:mysql://" + _dbConf.get("host").get + ":3306/analytic?characterEncoding=utf-8")
             ds.setUsername(_dbConf.get("uname").get)
             ds.setPassword(_dbConf.get("upswd").get)
 
-            val _analytic = ctx.getBean(classOf[AnalyticDB])
+            val _analytic = new AnalyticDB
             _analytic.setDataSource(ds)
 
             val batchSize = 30

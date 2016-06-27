@@ -110,7 +110,7 @@ class AnalyticDB extends Logging {
             if(_conn == null || _conn.isClosed)
                 connection()
 
-            val sql = "select * from analytic.ios_device_token where device_token in ('67fdeeda6a38229f5e6c340a2012b3a65deba86799aadfa5fe5d3b514ef83c0f', 'b6c4eef757bcabff77b297211393d3c7801c24fed111b6198b2fceb029512d52', '02ae9f210a7d2018207189dc2894552153e494c3f783528a82de5a73df0e0cbf') limit %d, %d;".format(from, to)
+            val sql = "select * from analytic.ios_device_token where device_token in ('c7c4b1add0d0c49bfcc3b5824c6a9013a06a2ed7db9a9b390aca9b77af6f613c', 'b6c4eef757bcabff77b297211393d3c7801c24fed111b6198b2fceb029512d52', '02ae9f210a7d2018207189dc2894552153e494c3f783528a82de5a73df0e0cbf') limit %d, %d;".format(from, to)
 
             log.info(sql)
 

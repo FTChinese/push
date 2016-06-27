@@ -4,9 +4,8 @@ import java.io.ByteArrayOutputStream
 
 import akka.actor.Actor
 import com.ftchinese.jobs.common._
-import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
+import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource}
 import org.slf4j.MDC
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 
 /**
@@ -171,14 +170,12 @@ class UpdateWorker(conf: JobsConfig) extends Actor with Logging {
 
         try {
 
-            val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
-
-            val ds: AnalyticDataSource = ctx.getBean(classOf[AnalyticDataSource])
+            val ds: AnalyticDataSource = new AnalyticDataSource
             ds.setUrl("jdbc:mysql://" + _dbConf.get("host").get + ":3306/analytic?characterEncoding=utf-8")
             ds.setUsername(_dbConf.get("uname").get)
             ds.setPassword(_dbConf.get("upswd").get)
 
-            val _analytic = ctx.getBean(classOf[AnalyticDB])
+            val _analytic = new AnalyticDB
             _analytic.setDataSource(ds)
 
             val batchSize = 30

@@ -3,9 +3,8 @@ package com.ftchinese.jobs.ui
 import java.util.Properties
 
 import com.ftchinese.jobs.common.{JobsConfig, Logging, NotificationMessage, TaskMessage}
-import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource, BeanConfig}
+import com.ftchinese.jobs.database.{AnalyticDB, AnalyticDataSource}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import scala.util.Random
 
@@ -15,7 +14,7 @@ import scala.util.Random
  */
 class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread with Logging {
 
-    private var _analytic: AnalyticDB = _
+    private val _analytic: AnalyticDB = new AnalyticDB
 
     override def run(): Unit ={
 
@@ -24,14 +23,11 @@ class PushTaskWorker(conf: JobsConfig, taskMessage: TaskMessage) extends Thread 
             // Database instance initialization.
             val dbConf = conf.fetchDriverConf("analytic", "mysql")
 
-            val ctx = new AnnotationConfigApplicationContext(classOf[BeanConfig])
-
-            val ds: AnalyticDataSource = ctx.getBean(classOf[AnalyticDataSource])
+            val ds: AnalyticDataSource = new AnalyticDataSource
             ds.setUrl("jdbc:mysql://" + dbConf.get("host").get + ":3306/analytic?characterEncoding=utf-8")
             ds.setUsername(dbConf.get("uname").get)
             ds.setPassword(dbConf.get("upswd").get)
 
-            _analytic = ctx.getBean(classOf[AnalyticDB])
             _analytic.setDataSource(ds)
 
             // Register a task
