@@ -12,7 +12,7 @@ class AnalyticDataSource {
     private val ds = new ComboPooledDataSource()
 
     ds.setMinPoolSize(1)
-    ds.setMaxPoolSize(100)
+    ds.setMaxPoolSize(30)
     ds.setAcquireIncrement(1)
 
     def setUrl(url: String): Unit ={
