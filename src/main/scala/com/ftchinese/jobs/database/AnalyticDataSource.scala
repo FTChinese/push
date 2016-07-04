@@ -2,25 +2,25 @@ package com.ftchinese.jobs.database
 
 import java.sql.Connection
 
-import com.mchange.v2.c3p0.ComboPooledDataSource
+import com.zaxxer.hikari.HikariDataSource
+
+//import com.mchange.v2.c3p0.ComboPooledDataSource
 
 /**
  * Analytic database source
  * Created by GWB on 2014/12/11.
  */
 class AnalyticDataSource {
-    private val ds = new ComboPooledDataSource()
+    private val ds = new HikariDataSource()
 
-    ds.setMinPoolSize(1)
-    ds.setMaxPoolSize(30)
-    ds.setAcquireIncrement(1)
+    ds.setMaximumPoolSize(30)
 
     def setUrl(url: String): Unit ={
         ds.setJdbcUrl(url)
     }
 
     def setUsername(username: String): Unit ={
-        ds.setUser(username)
+        ds.setUsername(username)
     }
 
     def setPassword(password: String): Unit ={
