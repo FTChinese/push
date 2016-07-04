@@ -13,7 +13,7 @@ import com.zaxxer.hikari.HikariDataSource
 class AnalyticDataSource {
     private val ds = new HikariDataSource()
 
-    ds.setMaximumPoolSize(30)
+    ds.setMaximumPoolSize(10)
 
     def setUrl(url: String): Unit ={
         ds.setJdbcUrl(url)
