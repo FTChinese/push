@@ -4,8 +4,6 @@ import java.sql.Connection
 
 import com.zaxxer.hikari.HikariDataSource
 
-//import com.mchange.v2.c3p0.ComboPooledDataSource
-
 /**
  * Analytic database source
  * Created by GWB on 2014/12/11.

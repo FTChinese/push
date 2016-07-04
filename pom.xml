@@ -4,7 +4,7 @@
 
     <groupId>com.ftchinese.jobs</groupId>
     <artifactId>ftchinese-jobs</artifactId>
-    <version>1.0.9-SNAPSHOT</version>
+    <version>1.0.10-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>jobs-push</name>
@@ -13,7 +13,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <org.mysql-connector-java.version>5.1.27</org.mysql-connector-java.version>
-        <c3p0.version>0.9.1.2</c3p0.version>
         <com.zaxxer.version>2.4.6</com.zaxxer.version>
         <org.scala-lang.version>2.10.4</org.scala-lang.version>
         <akka.version>2.3.9</akka.version>
@@ -83,12 +82,6 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-rewrite</artifactId>
             <version>${org.eclipse.jetty.version}</version>
-        </dependency>
-        <!-- c3p0 -->
-        <dependency>
-            <groupId>c3p0</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>${c3p0.version}</version>
         </dependency>
         <!-- HikariCP -->
         <dependency>
