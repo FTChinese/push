@@ -11,6 +11,7 @@ import com.zaxxer.hikari.HikariDataSource
 class AnalyticDataSource {
     private val ds = new HikariDataSource()
 
+    ds.setMinimumIdle(1)
     ds.setMaximumPoolSize(10)
 
     def setUrl(url: String): Unit ={
